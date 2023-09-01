@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>JavaScript Quiz</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <h1>JavaScript Quiz</h1>
+
+    <!-- Start Quiz Button -->
+    <div id="start-quiz-container">
+        <button id="start-quiz-button">Start Quiz</button>
+    </div>
+
+    <!-- Quiz Container -->
+    <div id="quiz-container">
+        <!-- Question and Options -->
+        <div id="question-container">
+            <p id="question"></p>
+        </div>
+        <div id="options-container">
+            <button id="option1"></button>
+            <button id="option2"></button>
+            <button id="option3"></button>
+        </div>
+
+        <!-- Timer and Score -->
+        <div id="timer-container">
+            <p>Time Left: <span id="timer">60</span> seconds</p>
+        </div>
+        <div id="score-container">
+            <p>Score: <span id="score">0</span></p>
+        </div>
+    </div>
+
+    <!-- Highscore Container -->
+    <div id="highscore-container">
+        <h2>Highscore leaderboard</h2>
+        <ul id="highscore-list"></ul>
+        <div>
+            <label for="initials">Your Initials:</label>
+            <input type="text" id="initials" />
+            <button id="save-score">Save Highscore</button>
+        </div>
+    </div>
+
+    <!-- JavaScript Code -->
+    <script>
+        const quizData = [
+            // Quiz questions and answers
+            {
+                question: "What is the primary purpose of JavaScript?",
+                options: ["Styling Web Pages", "Adding interactivity to websites", "Managing databases"],
+                correctAnswer: "Adding interactivity to websites"
+            },
+            {
+                question: "Which keyword is used to declare a variable in JavaScript?",
+                options: ["var", "int", "string"],
+                correctAnswer: "var"
+            },
+            {
+                question: "How do you write a comment in JavaScript?",
+                options: ["//This is a comment", "<!--This is a comment-->", "/This is a comment/"],
+                correctAnswer: "//This is a comment"
+            },
+            {
+                question: "Which function is used to print text to the console in JavaScript?",
+                options: ["alert()", "print()", "console.log()"],
+                correctAnswer: "console.log()"
+            },
+            {
+                question: "Which JavaScript operator is used for equality without type coercion?",
+                options: ["==", "===", "="],
+                correctAnswer: "==="
+            },
+            {
+                question: "What does the 'typeof' operator in JavaScript return when applied to a function?",
+                options: ["'function'", "'object'", "'undefined'"],
+                correctAnswer: "'function'"
+            },
+            {
+                question: "In JavaScript, how do you select an HTML element by its ID using the Document Object Model (DOM)?",
+                options: ["getElementByTagName", "document.getElementById", "selectElementByID"],
+                correctAnswer: "document.getElementById"
+            },
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timer = 60; // Initial timer value in seconds
+        let timerInterval;
+
+        // HTML elements
+        const questionElement = document.getElementById("question");
+        const optionsElement = document.getElementById("options-container");
+        const timerElement = document.getElementById("timer");
+        const scoreElement = document.getElementById("score");
+        const highscoreListElement = document.getElementById("highscore-list");
+        const initialsInput = document.getElementById("initials");
+        const saveScoreButton = document.getElementById("save-score");
+
+        // Initially hide question and options
+        questionElement.style.display = "none";
+        optionsElement.style.display = "none";
+
+        function startQuiz() {
+            const startQuizButton = document.getElementById("start-quiz-button");
+
+            // Hide the "Start Quiz" button and show the question and options
+            startQuizButton.style.display = "none";
+            questionElement.style.display = "block";
+            optionsElement.style.display = "block";
+
+            showQuestion(currentQuestionIndex);
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        // Add an event listener to the "Start Quiz" button to start the quiz
+        document.getElementById("start-quiz-button").addEventListener("click", startQuiz);
+
+        function showQuestion(index) {
+            if (index < quizData.length) {
+                const question = quizData[index];
+                questionElement.textContent = question.question;
+                optionsElement.innerHTML = "";
+
+                question.options.forEach((option, optionIndex) => {
+                    const button = document.createElement("button");
+                    button.textContent = option;
+                    button.addEventListener("click", () => checkAnswer(option, question.correctAnswer));
+                    optionsElement.appendChild(button);
+                });
+            } else {
+                endQuiz();
+            }
+        }
+
+        function checkAnswer(selectedOption, correctAnswer) {
+            if (selectedOption === correctAnswer) {
+                score++;
+                scoreElement.textContent = score;
+            } else {
+                // Deduct 5 seconds for a wrong answer
+                timer -= 5;
+                if (timer < 0) {
+                    timer = 0; // Ensure the timer doesn't go negative
+                }
+                timerElement.textContent = timer;
+            }
+
+            currentQuestionIndex++;
+            showQuestion(currentQuestionIndex);
+        }
+
+        function updateTimer() {
+            if (timer > 0) {
+                timer--;
+                timerElement.textContent = timer;
+            } else {
+                endQuiz();
+            }
+        }
+
+        function endQuiz() {
+            clearInterval(timerInterval);
+            alert(`Quiz ended. Your score: ${score}`);
+        }
+
+        function saveHighscore() {
+            const initials = initialsInput.value;
+            if (initials.trim() === "") {
+                alert("Please enter your initials.");
+                return;
+            }
+
+            const highscores = JSON.parse(localStorage.getItem("highscores")) || [];
+            highscores.push({ initials, score });
+            localStorage.setItem("highscores", JSON.stringify(highscores));
+
+            // Clear the input field and update the highscore list
+            initialsInput.value = "";
+            displayHighscores();
+        }
+
+        function displayHighscores() {
+            const highscores = JSON.parse(localStorage.getItem("highscores")) || [];
+            highscoreListElement.innerHTML = "";
+
+            highscores
+                .sort((a, b) => b.score - a.score)
+                .forEach((item, index) => {
+                    const li = document.createElement("li");
+                    li.textContent = `${index + 1}. ${item.initials}: ${item.score}`;
+                    highscoreListElement.appendChild(li);
+                });
+        }
+
+        saveScoreButton.addEventListener("click", saveHighscore);
+    </script>
+</body>
+
+</html>
