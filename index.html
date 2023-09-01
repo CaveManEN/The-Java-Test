@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JavaScript Quiz</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>JavaScript Quiz</h1>
+
+    <div id="quiz-container">
+        <div id="question-container">
+            <p id="question"></p>
+        </div>
+        <div id="options-container">
+            <button id="option1"></button>
+            <button id="option2"></button>
+            <button id="option3"></button>
+        </div>
+        <div id="timer-container">
+            <p>Time Left: <span id="timer">60</span> seconds</p>
+        </div>
+        <div id="score-container">
+            <p>Score: <span id="score">0</span></p>
+        </div>
+    </div>
+
+    <div id="highscore-container">
+        <h2>Highscore leaderboard</h2>
+        <ul id="highscore-list"></ul>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "What is the capital of France?",
+                options: ["Madrid", "Rome", "Paris"],
+                correctAnswer: "Paris"
+            },
+            {
+                question: "What is 2 + 2?",
+                options: ["3", "4", "5"],
+                correctAnswer: "4"
+            },
+            // Add more questions here
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timer = 60; // Initial timer value in seconds
+        let timerInterval;
+
+        const questionElement = document.getElementById("question");
+        const optionsElement = document.getElementById("options-container");
+        const timerElement = document.getElementById("timer");
+        const scoreElement = document.getElementById("score");
+        const highscoreListElement = document.getElementById("highscore-list");
+
+        function startQuiz() {
+            showQuestion(currentQuestionIndex);
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function showQuestion(index) {
+            if (index < quizData.length) {
+                const question = quizData[index];
+                questionElement.textContent = question.question;
+                optionsElement.innerHTML = "";
+
+                question.options.forEach((option, optionIndex) => {
+                    const button = document.createElement("button");
+                    button.textContent = option;
+                    button.addEventListener("click", () => checkAnswer(option, question.correctAnswer));
+                    optionsElement.appendChild(button);
+                });
+            } else {
+                endQuiz();
+            }
+        }
+
+        function checkAnswer(selectedOption, correctAnswer) {
+            if (selectedOption === correctAnswer) {
+                score++;
+                scoreElement.textContent = score;
+            }
+            currentQuestionIndex++;
+            showQuestion(currentQuestionIndex);
+        }
+
+        function updateTimer() {
+            if (timer > 0) {
+                timer--;
+                timerElement.textContent = timer;
+            } else {
+                endQuiz();
+            }
+        }
+
+        function endQuiz() {
+            clearInterval(timerInterval);
+            alert(`Quiz ended. Your score: ${score}`);
+            // You can implement highscore saving here (e.g., store in localStorage)
+        }
+
+        startQuiz();
+    </script>
+</body>
+</html>
+
+    </div>
+
+    <div id="highscore-container">
+        <h2>Highscores</h2>
+        <ul id="highscore-list"></ul>
+        <div>
+            <label for="initials">Your Initials:</label>
+            <input type="text" id="initials" />
+            <button id="save-score">Save Highscore</button>
+        </div>
+    </div>
+
+    <script>
+        
+
+        const initialsInput = document.getElementById("initials");
+        const saveScoreButton = document.getElementById("save-score");
+
+        function saveHighscore() {
+            const initials = initialsInput.value;
+            if (initials.trim() === "") {
+                alert("Please enter your initials.");
+                return;
+            }
+
+            const highscores = JSON.parse(localStorage.getItem("highscores")) || [];
+            highscores.push({ initials, score });
+            localStorage.setItem("highscores", JSON.stringify(highscores));
+
+            // Clear the input field and update the highscore list
+            initialsInput.value = "";
+            displayHighscores();
+        }
+
+        function displayHighscores() {
+            const highscores = JSON.parse(localStorage.getItem("highscores")) || [];
+            highscoreListElement.innerHTML = "";
+
+            highscores
+                .sort((a, b) => b.score - a.score)
+                .forEach((item, index) => {
+                    const li = document.createElement("li");
+                    li.textContent = `${index + 1}. ${item.initials}: ${item.score}`;
+                    highscoreListElement.appendChild(li);
+                });
+        }
+
+        saveScoreButton.addEventListener("click", saveHighscore);
+        displayHighscores();
+    </script>
+</body>
+</html>
